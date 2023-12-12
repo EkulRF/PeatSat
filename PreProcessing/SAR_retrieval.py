@@ -1,9 +1,5 @@
 import requests
-import pystac
 import pystac_client
-import folium
-import shapely.geometry
-from IPython.display import Image
 import ee
 ee.Authenticate()
 ee.Initialize()
@@ -25,7 +21,7 @@ def SAR_retrieval(bbox, time_range, sitename):
         ],
     }
 
-    sentinel1_viewingangle = get_sentinel1_collection_GEE(bbox, aoi, time_range)
+    sentinel1_viewingangle = get_sentinel1_viewingAngles_GEE(bbox, aoi, time_range)
     sentinel1_rtc = get_sentinel1_collection_MPC(bbox, time_range)
 
     print("Number of Sentinel-1 images from GEE:", sentinel1_viewingangle.size().getInfo())
@@ -38,7 +34,7 @@ def clip_image(image, aoi):
     return image.clipToBoundsAndScale(geometry=aoi, scale=30)
 
 # Google Earth Engine S1 Extraction
-def get_sentinel1_collection_GEE(bbox, aoi, time_range):
+def get_sentinel1_viewingAngles_GEE(bbox, aoi, time_range):
     region = ee.Geometry.Rectangle(bbox)
 
     sentinel1 = (ee.ImageCollection('COPERNICUS/S1_GRD')
