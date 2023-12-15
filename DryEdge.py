@@ -146,7 +146,7 @@ def calculate_ndvi_pixels(image):
 S2_boa = S2_boa.map(calculate_ndvi_pixels)
 
 # Keep images that have at least 1 valid NDVI pixel
-S2_boa = S2_boa.filter(ee.Filter.gt('NDVI_pixel_count', 1))
+S2_boa = S2_boa.filter(ee.Filter.gt('NDVI_pixel_count', 100))
 
 """
 # Based on VIs and STR we apply additional filters:
@@ -223,7 +223,7 @@ for i in range(int(minimal_ndvi * 1000), int(maximal_ndvi * 1000), int(step * 10
     temp_mask = temp_mask.arrayFlatten([['array']])
     temp_masked_array = str_array.updateMask(temp_mask)
     temp_masked_array2 = temp_masked_array.arrayProject(ee.List([0]))
-    temp_masked_array2 = temp_masked_array2.arrayReduce(ee.Reducer.max(), ee.List([0]))
+    temp_masked_array2 = temp_masked_array2.arrayReduce(ee.Reducer.min(), ee.List([0]))
     temp_masked_array2 = temp_masked_array2.arrayFlatten([['array']])
 
     # derive the median NDVI value of the working subinterval
@@ -245,7 +245,7 @@ for i in range(int(minimal_ndvi * 1000), int(maximal_ndvi * 1000), int(step * 10
     j += 1
 
 # min STR values within each NDVI subinterval
-# print(str_interval, "max STR within each NDVI subinterval")
+# print(str_interval, "min STR within each NDVI subinterval")
 
 
 # NDVI AND STR VALUES FOR DRY EDGE ESTIMATION
@@ -259,10 +259,10 @@ yValues2 = ee.List([])
 
 total_sub_number = j  # number of subintervals
 
-# Each NDVI interval has subintervals within which we derived max STR values.
-# Now, within each interval we calculate the median and std of max STR values.
-# Within each interval, we filter out max STR values that are bigger than median max STR + std max STR.
-# The remained max STR values are averaged (median) and associated with the median NDVI value within each interval.
+# Each NDVI interval has subintervals within which we derived min STR values.
+# Now, within each interval we calculate the median and std of min STR values.
+# Within each interval, we filter out min STR values that are bigger than median min STR + std min STR.
+# The remained min STR values are averaged (median) and associated with the median NDVI value within each interval.
 for i in range(0, total_sub_number, sub_number):
     interval_str = ee.List([])
     interval_str2 = ee.List([])
@@ -308,11 +308,11 @@ for i in range(0, total_sub_number, sub_number):
     yValues2 = yValues2.add(yval_to_add)
     xValues2 = xValues2.add(xval_to_add)
 
-# NDVI and STR values that are used for further Wet edge estimation
-# print("NDVI and STR for Wet edge", points)
+# NDVI and STR values that are used for further Dry edge estimation
+# print("NDVI and STR for Dry edge", points)
 
 
-# PARAMETERS FOR WET EDGE
+# PARAMETERS FOR DRY EDGE
 
 # Linear model with all the max STR and NDVI values
 linearFit = ee.Dictionary(points.reduce(ee.Reducer.linearFit()))
@@ -320,7 +320,7 @@ linearFit = ee.Dictionary(points.reduce(ee.Reducer.linearFit()))
 # print('y-intercept (preliminary):', linearFit.get('offset'))
 # print('Slope (preliminary):', linearFit.get('scale'))
 
-# To ensure that there are not STR outliers for Wet edge estimation -
+# To ensure that there are not STR outliers for Dry edge estimation -
 # we calculate RMSE of the resulted points. We filter out the max STR
 # values that do not lie within the range modelled max STR ± 2 * RMSE
 
@@ -373,10 +373,10 @@ for k in range(int(total_sub_number / sub_number)):
 
     reduced_points = ee.List(ee.Algorithms.If(condition, added_reduced_points, reduced_points))
 
-# Final points that can be used for the Wet edge estimation
-# print("Reduced NDVI and STR for Wet edge:", reduced_points)
+# Final points that can be used for the Dry edge estimation
+# print("Reduced NDVI and STR for Dry edge:", reduced_points)
 
-# Wet edge's parameters
+# Dry edge's parameters
 linearFit2 = ee.Dictionary(reduced_points.reduce(ee.Reducer.linearFit()))
 # print('y-intercept:', linearFit2.get('offset'))
 # print('Slope:', linearFit2.get('scale'))
@@ -395,7 +395,7 @@ table_name = ee.String(table.get("system:id")).split('/').get(3)
 ee_export.export_table_to_drive(
     collection= par_fc,
     selectors= ['coef'],
-    folder= 'LM_parameters_NDVI_wetedge_5cloudprov',
+    folder= 'LM_parameters_NDVI_dryedge_5cloudprov',
     description= table_name.getInfo(),
     fileFormat= 'CSV'
     )

@@ -208,8 +208,8 @@ step = 0.001  # step for intervals
 reduced_ndvi = ndvi_array.arrayReduce(ee.Reducer.median(), ee.List([0]))  # one median NDVI image to list
 
 """
-Within the NDVI-STR space we derive the min STR value for each NDVI subinterval
-This min STR value is arranged with the median NDVI value of each NDVI subinterval
+Within the NDVI-STR space we derive the max STR value for each NDVI subinterval
+This max STR value is arranged with the median NDVI value of each NDVI subinterval
 """
 
 for i in range(int(minimal_ndvi * 1000), int(maximal_ndvi * 1000), int(step * 1000)):
