@@ -218,7 +218,7 @@ for i in range(int(minimal_ndvi * 1000), int(maximal_ndvi * 1000), int(step * 10
     temp_mask1 = reduced_ndvi.gt(ee.Number(i))
     temp_mask2 = reduced_ndvi.lt(ee.Number(i + step))
 
-    # derive the min STR within the working subinterval
+    # derive the max STR within the working subinterval
     temp_mask = temp_mask1.And(temp_mask2)
     temp_mask = temp_mask.arrayProject(ee.List([0]))
     temp_mask = temp_mask.arrayFlatten([['array']])
@@ -393,13 +393,13 @@ par_list = ee.List([[par1, par2]])
 par_fc = ee.FeatureCollection(par_list.map(lambda point: ee.Feature(None, {'coef': point})))
 table_name = ee.String(table.get("system:id")).split('/').get(3)
 
-# Export the table to Google Drive
-task = ee.batch.Export.table.toDrive(
-    collection=par_fc,
-    description=table_name.getInfo(),
-    folder='LM_parameters_NDVI_wetedge_5cloudprov',
-    fileFormat='CSV'
-)
+# # Export the table to Google Drive
+# task = ee.batch.Export.table.toDrive(
+#     collection=par_fc,
+#     description=table_name.getInfo(),
+#     folder='LM_parameters_NDVI_wetedge_5cloudprov',
+#     fileFormat='CSV'
+# )
 
-# Start the export task
-task.start()
+# # Start the export task
+# task.start()

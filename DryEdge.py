@@ -374,7 +374,8 @@ for k in range(int(total_sub_number / sub_number)):
     reduced_points = ee.List(ee.Algorithms.If(condition, added_reduced_points, reduced_points))
 
 # Final points that can be used for the Dry edge estimation
-# print("Reduced NDVI and STR for Dry edge:", reduced_points)
+print("Reduced NDVI and STR for Dry edge:", reduced_points)
+print(len(reduced_points))
 
 # Dry edge's parameters
 linearFit2 = ee.Dictionary(reduced_points.reduce(ee.Reducer.linearFit()))
@@ -392,10 +393,14 @@ par_list = ee.List([[par1, par2]])
 par_fc = ee.FeatureCollection(par_list.map(lambda point: ee.Feature(None, {'coef': point})))
 table_name = ee.String(table.get("system:id")).split('/').get(3)
 
-ee_export.export_table_to_drive(
-    collection= par_fc,
-    selectors= ['coef'],
-    folder= 'LM_parameters_NDVI_dryedge_5cloudprov',
-    description= table_name.getInfo(),
-    fileFormat= 'CSV'
-    )
+# # Export the table to Google Drive
+# task = ee.batch.Export.table.toDrive(
+#     collection=par_fc,
+#     description=table_name.getInfo(),
+#     folder='LM_parameters_NDVI_wetedge_5cloudprov',
+#     fileFormat='CSV'
+# )
+
+# # Start the export task
+# task.start()
+
