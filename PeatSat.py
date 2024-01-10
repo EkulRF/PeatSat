@@ -6,3 +6,6 @@ sitename = 'FlowCountry'
 
 S1_imagery = SAR_retrieval(bbox, time_range, sitename)
 
+for image in S1_imagery:
+
+    print(image.assets['view_angle'])
